@@ -40,15 +40,18 @@ def get_prize_pool():
 
 def main_keyboard():
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("🎰 Play (opens browser)", url=DAPP_URL)],
+        [InlineKeyboardButton("🎰 Open Game", url=DAPP_URL)],
         [InlineKeyboardButton("📊 Stats", callback_data="stats"), InlineKeyboardButton("💰 Price", callback_data="price")],
         [InlineKeyboardButton("🏆 How to Win", callback_data="howtowin"), InlineKeyboardButton("📜 Contract", callback_data="contract")],
+        [InlineKeyboardButton("📱 How to Connect", callback_data="connect")],
         [InlineKeyboardButton("🔗 Explorer", url=f"{EXPLORER}/address/{CONTRACT}"), InlineKeyboardButton("❓ Help", callback_data="help")],
-        [InlineKeyboardButton("🌐 Website", url=DAPP_URL)],
     ])
 
 def back_keyboard():
-    return InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Back", callback_data="back")]])
+    return InlineKeyboardMarkup([[
+        InlineKeyboardButton("🎰 Open Game", url=DAPP_URL),
+        InlineKeyboardButton("⬅️ Back", callback_data="back")
+    ]])
 
 WELCOME = """
 ✦ *SCRATCHCARD NFT* ✦
@@ -64,7 +67,35 @@ WELCOME = """
 
 🥉 Small Win → 2x · 🥈 Big Win → 5x · 🥇 Jackpot → 20x
 ━━━━━━━━━━━━━━━━━━━━
+⚠️ Open in MetaMask or Trust Wallet browser!
 Ready to scratch? 👇
+"""
+
+CONNECT_HELP = """
+📱 *HOW TO CONNECT WALLET*
+━━━━━━━━━━━━━━━━━━━━
+
+Telegram browser blocks Web3!
+You need to open in a wallet browser:
+
+*Option 1 — MetaMask Mobile:*
+1️⃣ Open MetaMask app
+2️⃣ Tap the browser icon
+3️⃣ Go to: scratchnft.imperamonad.xyz
+4️⃣ Connect wallet
+
+*Option 2 — Trust Wallet:*
+1️⃣ Open Trust Wallet
+2️⃣ Tap DApps or Browser
+3️⃣ Go to: scratchnft.imperamonad.xyz
+4️⃣ Connect wallet
+
+*Option 3 — Desktop:*
+1️⃣ Open Chrome with MetaMask extension
+2️⃣ Go to: scratchnft.imperamonad.xyz
+3️⃣ Connect wallet
+
+━━━━━━━━━━━━━━━━━━━━
 """
 
 async def start(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
@@ -81,6 +112,8 @@ async def button(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     await q.answer()
     if q.data == "back":
         await q.edit_message_text(WELCOME, parse_mode="Markdown", reply_markup=main_keyboard())
+    elif q.data == "connect":
+        await q.edit_message_text(CONNECT_HELP, parse_mode="Markdown", reply_markup=back_keyboard())
     elif q.data == "stats":
         supply = get_total_supply()
         price  = get_card_price()
@@ -118,8 +151,8 @@ async def button(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 
 def main():
     app = Application.builder().token(BOT_TOKEN).build()
-    app.add_handler(CommandHandler("start",    start))
-    app.add_handler(CommandHandler("help",     help_cmd))
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("help",  help_cmd))
     app.add_handler(CallbackQueryHandler(button))
     log.info("ScratchCard Bot started - scratchnft.imperamonad.xyz")
     app.run_polling(allowed_updates=Update.ALL_TYPES)
