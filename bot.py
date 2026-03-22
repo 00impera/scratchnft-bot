@@ -6,7 +6,7 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Cont
 
 BOT_TOKEN    = os.environ["BOT_TOKEN"]
 CONTRACT     = "0x71a8F50008b08cc736E739239faF549a34fD9C8f"
-DAPP_URL     = "https://scratchnft.imperamonad.xyz"
+DAPP_URL     = "https://ancient-lab-377a.nelutz2you.workers.dev/"
 RPC_URL      = "https://rpc.monad.xyz"
 CHAIN_ID     = 143
 EXPLORER     = "https://monad.socialscan.io"
