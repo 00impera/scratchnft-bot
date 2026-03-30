@@ -9,7 +9,20 @@ CONTRACT     = "0x71a8F50008b08cc736E739239faF549a34fD9C8f"
 DAPP_URL     = "https://ancient-lab-377a.nelutz2you.workers.dev/"
 RPC_URL      = "https://rpc.monad.xyz"
 CHAIN_ID     = 143
-EXPLORER     = "https://monad.socialscan.io"
+EXPLORER     = "https://explorer.monad.xyz"
+
+# GitHub raw images
+RAW = "https://raw.githubusercontent.com/00impera/scratchnft/Telegram8/images"
+LOGO        = f"{RAW}/logo1.png"
+USDC_UNSRC  = f"{RAW}/usdc_unscratched.jpg"
+USDC_SMALL  = f"{RAW}/usdc_small.jpg"
+USDC_BIG    = f"{RAW}/usdc_big.jpg"
+USDC_LOSE   = f"{RAW}/usdc_lose.jpg"
+ETH_UNSRC   = f"{RAW}/eth_unscratched.jpg"
+ETH_LOSE    = f"{RAW}/eth_lose.jpg"
+MONAD_UNSRC = f"{RAW}/monad_unscratched.jpg"
+MONAD_BIG   = f"{RAW}/monad_big.jpg"
+MONAD_LOSE  = f"{RAW}/monad_lose.jpg"
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
@@ -43,7 +56,7 @@ def main_keyboard():
         [InlineKeyboardButton("🎰 Open Game", url=DAPP_URL)],
         [InlineKeyboardButton("📊 Stats", callback_data="stats"), InlineKeyboardButton("💰 Price", callback_data="price")],
         [InlineKeyboardButton("🏆 How to Win", callback_data="howtowin"), InlineKeyboardButton("📜 Contract", callback_data="contract")],
-        [InlineKeyboardButton("📱 How to Connect", callback_data="connect")],
+        [InlineKeyboardButton("📱 How to Connect", callback_data="connect"), InlineKeyboardButton("🃏 Cards", callback_data="cards")],
         [InlineKeyboardButton("🔗 Explorer", url=f"{EXPLORER}/address/{CONTRACT}"), InlineKeyboardButton("❓ Help", callback_data="help")],
     ])
 
@@ -57,7 +70,6 @@ WELCOME = """
 ✦ *SCRATCHCARD NFT* ✦
 ━━━━━━━━━━━━━━━━━━━━
 🎰 First on-chain scratch card on *Monad*!
-🌐 scratchnft.imperamonad.xyz
 
 1️⃣ Mint a scratch card NFT
 2️⃣ Scratch it on-chain
@@ -65,7 +77,9 @@ WELCOME = """
 
 🏍️ USDC Rider · ⚔️ ETH Warrior · 🏎️ Monad Racer
 
-🥉 Small Win → 2x · 🥈 Big Win → 5x · 🥇 Jackpot → 20x
+🥉 Small Win → 2x
+🥈 Big Win → 5x
+🥇 Jackpot → 20x
 ━━━━━━━━━━━━━━━━━━━━
 ⚠️ Open in MetaMask or Trust Wallet browser!
 Ready to scratch? 👇
@@ -81,71 +95,152 @@ You need to open in a wallet browser:
 *Option 1 — MetaMask Mobile:*
 1️⃣ Open MetaMask app
 2️⃣ Tap the browser icon
-3️⃣ Go to: scratchnft.imperamonad.xyz
+3️⃣ Go to: ancient-lab-377a.nelutz2you.workers.dev
 4️⃣ Connect wallet
 
 *Option 2 — Trust Wallet:*
 1️⃣ Open Trust Wallet
 2️⃣ Tap DApps or Browser
-3️⃣ Go to: scratchnft.imperamonad.xyz
+3️⃣ Go to: ancient-lab-377a.nelutz2you.workers.dev
 4️⃣ Connect wallet
 
 *Option 3 — Desktop:*
 1️⃣ Open Chrome with MetaMask extension
-2️⃣ Go to: scratchnft.imperamonad.xyz
+2️⃣ Go to: ancient-lab-377a.nelutz2you.workers.dev
 3️⃣ Connect wallet
 
 ━━━━━━━━━━━━━━━━━━━━
 """
 
+CARDS_TEXT = """
+🃏 *SCRATCH CARD COLLECTION*
+━━━━━━━━━━━━━━━━━━━━
+
+🏍️ *USDC Rider* — RARE
+Stablecoin street racer, blue-chip DeFi master.
+
+⚔️ *ETH Warrior* — EPIC  
+Battle-hardened gladiator, forged in gas wars.
+
+🏎️ *Monad Racer* — LEGENDARY
+Speed demon of parallel execution.
+
+━━━━━━━━━━━━━━━━━━━━
+Each card: Mint → Scratch → Win MON instantly!
+"""
+
 async def start(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(WELCOME, parse_mode="Markdown", reply_markup=main_keyboard())
+    # Send logo image + welcome text
+    await update.message.reply_photo(
+        photo=LOGO,
+        caption=WELCOME,
+        parse_mode="Markdown",
+        reply_markup=main_keyboard()
+    )
 
 async def help_cmd(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "❓ *HELP*\n\n🌐 scratchnft.imperamonad.xyz\n\nMonad Mainnet Chain ID: 143\n\n/start /stats /price /contract /help",
+        "❓ *HELP*\n\n🌐 ancient-lab-377a.nelutz2you.workers.dev\n\nMonad Mainnet Chain ID: 143\n\n/start /stats /price /contract /help",
         parse_mode="Markdown", reply_markup=main_keyboard()
     )
 
 async def button(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     q = update.callback_query
     await q.answer()
+
     if q.data == "back":
-        await q.edit_message_text(WELCOME, parse_mode="Markdown", reply_markup=main_keyboard())
+        await q.edit_message_caption(caption=WELCOME, parse_mode="Markdown", reply_markup=main_keyboard())
+
     elif q.data == "connect":
-        await q.edit_message_text(CONNECT_HELP, parse_mode="Markdown", reply_markup=back_keyboard())
+        await q.edit_message_caption(caption=CONNECT_HELP, parse_mode="Markdown", reply_markup=back_keyboard())
+
+    elif q.data == "cards":
+        await q.edit_message_media(
+            media=__import__('telegram').InputMediaPhoto(media=USDC_UNSRC, caption=CARDS_TEXT, parse_mode="Markdown"),
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("🏍️ USDC", callback_data="card_usdc"),
+                 InlineKeyboardButton("⚔️ ETH", callback_data="card_eth"),
+                 InlineKeyboardButton("🏎️ Monad", callback_data="card_monad")],
+                [InlineKeyboardButton("🎰 Open Game", url=DAPP_URL),
+                 InlineKeyboardButton("⬅️ Back", callback_data="back")]
+            ])
+        )
+
+    elif q.data == "card_usdc":
+        await q.edit_message_media(
+            media=__import__('telegram').InputMediaPhoto(
+                media=USDC_UNSRC,
+                caption="🏍️ *USDC RIDER* — RARE\n━━━━━━━━━━━━━━━━━━━━\nElite crypto mercenary riding the stablecoin wave.\n\n🥉 Small Win: 2×\n🥈 Big Win: 5×\n🥇 Jackpot: 20×",
+                parse_mode="Markdown"
+            ),
+            reply_markup=InlineKeyboardMarkup([[
+                InlineKeyboardButton("🎰 Mint USDC Rider", url=DAPP_URL),
+                InlineKeyboardButton("⬅️ Back", callback_data="cards")
+            ]])
+        )
+
+    elif q.data == "card_eth":
+        await q.edit_message_media(
+            media=__import__('telegram').InputMediaPhoto(
+                media=ETH_UNSRC,
+                caption="⚔️ *ETH WARRIOR* — EPIC\n━━━━━━━━━━━━━━━━━━━━\nBattle-hardened Ethereum gladiator, forged in gas wars.\n\n🥉 Small Win: 2×\n🥈 Big Win: 5×\n🥇 Jackpot: 20×",
+                parse_mode="Markdown"
+            ),
+            reply_markup=InlineKeyboardMarkup([[
+                InlineKeyboardButton("🎰 Mint ETH Warrior", url=DAPP_URL),
+                InlineKeyboardButton("⬅️ Back", callback_data="cards")
+            ]])
+        )
+
+    elif q.data == "card_monad":
+        await q.edit_message_media(
+            media=__import__('telegram').InputMediaPhoto(
+                media=MONAD_UNSRC,
+                caption="🏎️ *MONAD RACER* — LEGENDARY\n━━━━━━━━━━━━━━━━━━━━\nLegendary speed demon of parallel execution.\n\n🥉 Small Win: 2×\n🥈 Big Win: 5×\n🥇 Jackpot: 20×",
+                parse_mode="Markdown"
+            ),
+            reply_markup=InlineKeyboardMarkup([[
+                InlineKeyboardButton("🎰 Mint Monad Racer", url=DAPP_URL),
+                InlineKeyboardButton("⬅️ Back", callback_data="cards")
+            ]])
+        )
+
     elif q.data == "stats":
         supply = get_total_supply()
         price  = get_card_price()
         pool   = get_prize_pool()
-        await q.edit_message_text(
-            f"📊 *LIVE STATS*\n━━━━━━━━━━━━━━━━━━━━\n🃏 Cards Minted: `{supply}`\n💎 Card Price: `{price:.4f} MON`\n🏦 Prize Pool: `{pool:.4f} MON`\n━━━━━━━━━━━━━━━━━━━━",
+        await q.edit_message_caption(
+            caption=f"📊 *LIVE STATS*\n━━━━━━━━━━━━━━━━━━━━\n🃏 Cards Minted: `{supply}`\n💎 Card Price: `{price:.4f} MON`\n🏦 Prize Pool: `{pool:.4f} MON`\n━━━━━━━━━━━━━━━━━━━━",
             parse_mode="Markdown", reply_markup=main_keyboard()
         )
+
     elif q.data == "price":
         price = get_card_price()
         pool  = get_prize_pool()
-        await q.edit_message_text(
-            f"💰 *CARD PRICE*\n━━━━━━━━━━━━━━━━━━━━\n🎟️ Mint: `{price:.4f} MON`\n🥇 Jackpot: `{pool*0.2:.4f} MON`\n🥈 Big Win: `{price*5:.4f} MON`\n🥉 Small: `{price*2:.4f} MON`\n━━━━━━━━━━━━━━━━━━━━",
+        await q.edit_message_caption(
+            caption=f"💰 *CARD PRICE*\n━━━━━━━━━━━━━━━━━━━━\n🎟️ Mint: `{price:.4f} MON`\n🥇 Jackpot: `{pool*0.2:.4f} MON`\n🥈 Big Win: `{price*5:.4f} MON`\n🥉 Small: `{price*2:.4f} MON`\n━━━━━━━━━━━━━━━━━━━━",
             parse_mode="Markdown", reply_markup=main_keyboard()
         )
+
     elif q.data == "howtowin":
-        await q.edit_message_text(
-            "🏆 *HOW TO WIN*\n━━━━━━━━━━━━━━━━━━━━\nStep 1 — Connect Wallet\nStep 2 — Mint a Card\nStep 3 — Scratch on-chain\nStep 4 — Claim prize instantly!\n━━━━━━━━━━━━━━━━━━━━\n100% on-chain and fair",
+        await q.edit_message_caption(
+            caption="🏆 *HOW TO WIN*\n━━━━━━━━━━━━━━━━━━━━\nStep 1 — Connect Wallet\nStep 2 — Mint a Card\nStep 3 — Scratch on-chain\nStep 4 — Claim prize instantly!\n━━━━━━━━━━━━━━━━━━━━\n100% on-chain and fair",
             parse_mode="Markdown", reply_markup=back_keyboard()
         )
+
     elif q.data == "contract":
-        await q.edit_message_text(
-            f"📜 *CONTRACT*\n━━━━━━━━━━━━━━━━━━━━\n`{CONTRACT}`\nMonad Chain ID: {CHAIN_ID}\n━━━━━━━━━━━━━━━━━━━━",
+        await q.edit_message_caption(
+            caption=f"📜 *CONTRACT*\n━━━━━━━━━━━━━━━━━━━━\n`{CONTRACT}`\nMonad Chain ID: {CHAIN_ID}\n━━━━━━━━━━━━━━━━━━━━",
             parse_mode="Markdown",
             reply_markup=InlineKeyboardMarkup([[
                 InlineKeyboardButton("🔗 Explorer", url=f"{EXPLORER}/address/{CONTRACT}"),
                 InlineKeyboardButton("⬅️ Back", callback_data="back")
             ]])
         )
+
     elif q.data == "help":
-        await q.edit_message_text(
-            "❓ *HELP*\n\n🌐 scratchnft.imperamonad.xyz\nMonad Mainnet Chain ID: 143\n\n/start /stats /price /contract /help",
+        await q.edit_message_caption(
+            caption="❓ *HELP*\n\n🌐 ancient-lab-377a.nelutz2you.workers.dev\nMonad Mainnet Chain ID: 143\n\n/start /stats /price /contract /help",
             parse_mode="Markdown", reply_markup=main_keyboard()
         )
 
@@ -154,7 +249,7 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help",  help_cmd))
     app.add_handler(CallbackQueryHandler(button))
-    log.info("ScratchCard Bot started - scratchnft.imperamonad.xyz")
+    log.info("ScratchCard Bot started - ancient-lab-377a.nelutz2you.workers.dev")
     app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
