@@ -1,6 +1,8 @@
 import os
 import logging
+import threading
 import requests
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 
@@ -25,6 +27,22 @@ MONAD_LOSE  = f"{RAW}/monad_lose.jpg"
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
+
+# ── Health check server (keeps Render free web service alive) ──────────────
+class HealthHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"OK")
+    def log_message(self, format, *args):
+        pass  # silence noisy access logs
+
+def run_health_server():
+    server = HTTPServer(("0.0.0.0", 10000), HealthHandler)
+    server.serve_forever()
+
+threading.Thread(target=run_health_server, daemon=True).start()
+# ──────────────────────────────────────────────────────────────────────────
 
 def rpc_call(method, params):
     try:
